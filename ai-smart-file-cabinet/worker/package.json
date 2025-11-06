@@ -1,0 +1,21 @@
+{
+  "name": "ai-smart-file-cabinet-worker",
+  "version": "1.0.0",
+  "description": "Worker for processing file ingestion tasks in the AI Smart Digital File Cabinet project.",
+  "main": "src/ingestWorker.ts",
+  "scripts": {
+    "start": "ts-node src/ingestWorker.ts",
+    "build": "tsc",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "typescript": "^4.5.4",
+    "ts-node": "^10.4.0",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
