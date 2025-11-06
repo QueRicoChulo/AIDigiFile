@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-smart-
 });
 
 // API routes
-app.use('/api', apiRoutes());
+app.use('/api', apiRoutes);
 
 // Start the server
 app.listen(PORT, () => {

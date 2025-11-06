@@ -1,14 +1,28 @@
+import { Request, Response } from 'express';
+
 class FilesController {
-    async uploadFile(req, res) {
-        // Logic for handling file upload
+    // Handle file upload
+    async uploadFile(req: Request, res: Response) {
+        // Minimal implementation: echo back filename if present
+        const file = (req as any).file || null;
+        if (file && file.originalname) {
+            return res.status(201).json({ message: 'File uploaded', fileName: file.originalname });
+        }
+        return res.status(400).json({ error: 'No file provided' });
     }
 
-    async retrieveFile(req, res) {
-        // Logic for retrieving a file
+    // Provide file metadata or streaming in a real implementation
+    async getFile(req: Request, res: Response) {
+        const id = req.params.id;
+        // Placeholder implementation
+        return res.status(200).json({ id, message: 'File retrieval not implemented' });
     }
 
-    async deleteFile(req, res) {
-        // Logic for deleting a file
+    // Delete a file by id/name
+    async deleteFile(req: Request, res: Response) {
+        const id = req.params.id;
+        // Placeholder implementation
+        return res.status(200).json({ id, message: 'File deleted (not really in this stub)' });
     }
 }
 

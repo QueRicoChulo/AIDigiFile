@@ -5,7 +5,8 @@ export class IngestionService {
         this.fileStoragePath = fileStoragePath;
     }
 
-    public async ingestFile(file: Express.Multer.File): Promise<string> {
+    // Minimal uploaded file shape to avoid depending on multer types here
+    public async ingestFile(file: { originalname: string; buffer: Buffer }): Promise<string> {
         const filePath = `${this.fileStoragePath}/${file.originalname}`;
         await this.saveFile(file.buffer, filePath);
         return filePath;
