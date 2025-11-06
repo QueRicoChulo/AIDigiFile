@@ -96,6 +96,73 @@ Notes:
 - If you prefer the repo to manage TLS via Caddy, set `USE_EXTERNAL_PROXY=false` and provide `DOMAIN` and `LETSENCRYPT_EMAIL` in `.env`.
 - Ensure ports required by your chosen setup are open on the VPS (e.g., 8081 for external proxy, 80/443 for Caddy).
 
+## Clone, run code checks, and deploy on a VPS (detailed)
+
+Follow these commands on your VPS (216.219.90.60) to clone the repo, run TypeScript checks, and deploy. This assumes you have Docker and Docker Compose installed and the VPS user has permission to run Docker.
+
+1) Clone the repository and change into the project folder:
+
+```bash
+# on the VPS
+git clone <your-repo-url> ai-smart-file-cabinet
+cd ai-smart-file-cabinet
+```
+
+2) Create the `.env` from the example and configure external proxy settings:
+
+```bash
+cp .env.example .env
+# Edit .env and set the following for an external proxy setup:
+# USE_EXTERNAL_PROXY=true
+# EXTERNAL_PROXY_PORT=8081
+# (If you want Caddy to manage TLS, set USE_EXTERNAL_PROXY=false and provide DOMAIN and LETSENCRYPT_EMAIL.)
+```
+
+3) (Optional but recommended) Run TypeScript checks locally on the VPS before building images. This will install the project dependencies for each subproject and run `tsc --noEmit`.
+
+```bash
+# Install backend and worker dependencies (frontend deps are installed during build)
+npm install --prefix backend
+npm install --prefix worker
+
+# Run TypeScript checks
+npx --prefix frontend tsc --noEmit -p frontend/tsconfig.json
+npx --prefix backend tsc --noEmit -p backend/tsconfig.json
+npx --prefix worker tsc --noEmit -p worker/tsconfig.json
+```
+
+If `tsc` reports errors (for example implicit `any` on route handlers or missing types), fix them before deploying or proceed if you accept the risk. Example common fixes:
+- Add explicit types for Express handlers: `(req: Request, res: Response)` and import types from `express`.
+- Ensure multer types are available or install `@types/multer` if using Multer.
+
+4) Build and start the stack (this runs `docker-compose` and builds images):
+
+```bash
+chmod +x ./deploy.sh
+./deploy.sh
+```
+
+5) If using an external nginx reverse proxy on another host (e.g. files.aiwonderagents.com -> 216.219.90.60:8081), open the VPS firewall port and ensure the proxy points to the VPS port:
+
+```bash
+# allow port 8081 through UFW (adjust if you use a different firewall)
+sudo ufw allow 8081/tcp
+# verify docker is listening on the port
+sudo ss -ltnp | grep 8081 || sudo netstat -ltnp | grep 8081
+```
+
+6) To update later (pull and redeploy):
+
+```bash
+chmod +x ./update.sh
+./update.sh
+```
+
+Troubleshooting & notes
+- If `npm install` or `tsc` fail on the VPS, ensure the VPS has a compatible Node.js version (see each package.json `engines` field) and enough disk space.
+- Do NOT commit or store API keys in the repository. Use the `.env` file or Docker secrets for production secrets.
+- The repository includes `deploy.sh` which will either start Caddy for TLS (if `USE_EXTERNAL_PROXY=false`) or start only the backend+frontend and expose the frontend on `EXTERNAL_PROXY_PORT` (if `USE_EXTERNAL_PROXY=true`).
+
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
 
